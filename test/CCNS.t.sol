@@ -15,14 +15,14 @@ contract CCNSTest is Test {
     Register.NetworkDetails ethSepoliaNetworkDetails;
     Register.NetworkDetails arbSepoliaNetworkDetails;
 
-    address me;
+    address alice;
     CrossChainNameServiceLookup public ethSepoliaCCNSLookup;
     CrossChainNameServiceLookup public arbSepoliaCCNSLookup;
     CrossChainNameServiceReceiver public ethSepoliaCCNSReceiver;
     CrossChainNameServiceRegister public arbSepoliaCCNSRegister;
 
     function setUp() public {
-        me = makeAddr("0x7fe7A1b34987D0C5848A006F22323731E55Ff2C6");
+        alice = makeAddr("alice");
 
         ccipLocalSimulatorFork = new CCIPLocalSimulatorFork();
         vm.makePersistent(address(ccipLocalSimulatorFork));
@@ -84,13 +84,13 @@ contract CCNSTest is Test {
     }
 
     function test_arbSepoliaRegister() public {
-        vm.startPrank(me);
-        arbSepoliaCCNSRegister.register("hello");
+        vm.startPrank(alice);
+        arbSepoliaCCNSRegister.register("alice.ccns");
 
-        assertEq(arbSepoliaCCNSLookup.lookup("hello"), address(me));
+        assertEq(arbSepoliaCCNSLookup.lookup("alice.ccns"), address(alice));
 
         vm.selectFork(ethSepoliaFork);
-        assertEq(ethSepoliaCCNSLookup.lookup("hello"), address(0));
+        assertEq(ethSepoliaCCNSLookup.lookup("alice.ccns"), address(0));
         vm.stopPrank();
     }
 
@@ -104,13 +104,13 @@ contract CCNSTest is Test {
 
         assertEq(address(arbSepoliaCCNSRegister).balance, 10 ** 18);
 
-        vm.startPrank(me);
-        arbSepoliaCCNSRegister.register("hello");
+        vm.startPrank(alice);
+        arbSepoliaCCNSRegister.register("alice.ccns");
         vm.stopPrank();
-        assertEq(arbSepoliaCCNSLookup.lookup("hello"), address(me));
+        assertEq(arbSepoliaCCNSLookup.lookup("alice.ccns"), address(alice));
 
         ccipLocalSimulatorFork.switchChainAndRouteMessage(ethSepoliaFork); // 这行代码将更换CHAINLINK CCIP DONs, 不要遗漏
         assertEq(vm.activeFork(), ethSepoliaFork);
-        assertEq(ethSepoliaCCNSLookup.lookup("hello"), address(me));
+        assertEq(ethSepoliaCCNSLookup.lookup("alice.ccns"), address(alice));
     }
 }
